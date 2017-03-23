@@ -21,16 +21,16 @@ createTrainingMatchups <- function(season.years){
                 result <- c(result, 1)
                 wteam <- c(wteam, row$wteam)
                 lteam <- c(lteam, row$lteam)
-                wteam_name <- c(wteam_name, teams[match(row$wteam, teams$Team),][,2]$Team_Name) 
-                lteam_name <- c(lteam_name, teams[match(row$lteam, teams$Team),][,2]$Team_Name)
+                wteam_name <- c(wteam_name, teams[match(row$wteam, teams$Team),]$Team_Name) 
+                lteam_name <- c(lteam_name, teams[match(row$lteam, teams$Team),]$Team_Name)
             } else {
                 oth <- paste(year, row$lteam, row$wteam, sep = '_')
                 team <- c(team, oth)
                 result <- c(result, 0)
                 wteam <- c(wteam, row$wteam)
                 lteam <- c(lteam, row$lteam)
-                wteam_name <- c(wteam_name, teams[match(row$wteam, teams$Team),][,2]$Team_Name) 
-                lteam_name <- c(lteam_name, teams[match(row$lteam, teams$Team),][,2]$Team_Name)
+                wteam_name <- c(wteam_name, teams[match(row$wteam, teams$Team),]$Team_Name) 
+                lteam_name <- c(lteam_name, teams[match(row$lteam, teams$Team),]$Team_Name)
             }
         }
     }
