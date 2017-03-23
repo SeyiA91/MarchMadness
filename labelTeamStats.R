@@ -1,7 +1,7 @@
-labelTeamStats <- function(prefix){
+labelTeamStats <- function(prefix, df){
     col_names <- character()
     # setting up team stats
-    for (j in colnames(stats)){
+    for (j in colnames(df)){
         if (j == 'TEAMID' & prefix == 'w'){
             col_names <- c(col_names, 'wteam')
         }else if (j == 'TEAMID' & prefix == 'l'){
