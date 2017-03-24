@@ -22,6 +22,6 @@ submissionFile <- function(season.years) {
             }
         }
     }
-    form <- data.frame("Matchup" = idcol, "Win" = NA)
+    form <- data.frame("matchup" = idcol, "win" = NA)
     return(form)
 }
