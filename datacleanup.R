@@ -2,71 +2,17 @@ setwd('~/dev/marchMayhem/March_Madness_2017/')
 rm(list = ls())
 
 # scripts needed for data transformations
-source('../prepTrainingData.R')
+source('../prepData.R')
 
-# season.years <- levels(as.factor(tourney_results.c$Season))[19:32]
-season.years <- c('2016')
+season.years <- levels(as.factor(tourney_results.c$Season))[19:32]
+# season.years <- c('2016')
 
 train_df <- prepTrainingData(season.years)
+test_df <- prepTestingData('2017')
 
 str(train_df)
 require(lattice)
 with(train_df, xyplot(win,w_twpct))
-
-
-# prepTrainingData <- function(season.years) {
-#     train_df <- createTrainingMatchups(season.years)
-#     
-#     # Creating training data 
-#     require(stringr)
-#     
-#     # getting win pctage
-#     winPctage <- getWinPctage(season.years)
-#     
-#     # field goal percentages
-#     shootingpct <- getShootingPercentages(season.years)
-#     
-#     # assists and turnovers
-#     assistsNturnovers <- getAssistsNturnovers(season.years)
-#     
-#     # rebounds per game (offensive & defensive)
-#     reboundStats <- getReboundStats(season.years)
-#     
-#     # Num of wins in last 6
-#     wins_last_six_games_by_team <- winsLst6(season.years)
-#     
-#     # Seed in tourney
-#     seeding <- getTourneySeed(season.years)
-#     
-#     # Combining columns together
-#     stats <- Reduce(function(x, y) merge(x, y, by = c('TEAMID', 'season')), list(winPctage, shootingpct, assistsNturnovers,
-#                                                                                  reboundStats, wins_last_six_games_by_team, seeding))
-#     
-#     col_names.w <- labelTeamStats('w')
-#     col_names.l <- labelTeamStats('l')
-#     
-#     stats.w <- stats
-#     colnames(stats.w) <- col_names.w
-#     stats.l <- stats
-#     colnames(stats.l) <- col_names.l
-#     # creating final df
-#     team_metrics.w <- merge(train_df, stats.w, by = c('wteam', 'season'))
-#     team_metrics.t <- merge(team_metrics.w, stats.l, by = c('lteam', 'season'))
-#     
-#     # reordering columns
-#     wcols <- names(team_metrics.t[,grep('w_', names(team_metrics.t))])
-#     lcols <- names(team_metrics.t[,grep('l_', names(team_metrics.t))])
-#     team_metrics <- team_metrics.t[, c("season", "matchup", "win", "wteam", "lteam", wcols, lcols)]
-#     team_metrics <- team_metrics[order(team_metrics$season),]
-#     
-#     # chaning classes of certain vars
-#     # team_metrics$season <- as.factor(team_metrics$season)
-#     team_metrics$win <- as.factor(team_metrics$win)
-#     team_metrics$wteam <- as.factor(team_metrics$wteam)
-#     team_metrics$lteam <- as.factor(team_metrics$lteam)
-#     
-#     return(team_metrics)
-# }
 
 ######## building model #########  
 train <- subset(team_metrics, season <= 2014)
@@ -88,8 +34,16 @@ test_df <- test[,c(-c(1:3,4:5))]
 library(randomForest)  
 library(e1071)  
 library(caret)  
-rf = randomForest(win ~., data = train_df, ntree = 100)
-pred <- predict(rf, test_df)
+train_df <- train_df[complete.cases(train_df),]
+# vars2exclude <- c("w_TEAM_NAME","wteam", "l_TEAM_NAME", "lteam", "season", "matchup" )
+# cols2exclude <- names(test_df) %in% vars2exclude
+# test <- test_df[!cols2exclude]
+# rf = randomForest(win ~., data = train_df, ntree = 100)
+rf = randomForest(win ~.-w_TEAM_NAME -wteam -l_TEAM_NAME -lteam -season -matchup, data = train_df, ntree = 100)
+
+pred <- predict(rf, test_df, type = 'prob')
+hmm <- cbind(pred, test_df); hmm$win <- ifelse(hmm$`0` < hmm$`1`, 1, 0)
+varImpPlot(rf)
 print(confusionMatrix(data = pred,
                       reference = test$win,
                       positive = "1"))
