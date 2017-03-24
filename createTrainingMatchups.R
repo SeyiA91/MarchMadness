@@ -35,7 +35,7 @@ createTrainingMatchups <- function(season.years){
         }
     }
     train_df <- data.frame('matchup' = team, 'season' = season, 'win' = result, 'wteam' = wteam,
-                           'wteam_name' = wteam_name, 'lteam' = lteam, 'lteam_name' = lteam_name)
-    # train_df <- cbind(train_df, season_matches$wteam, season_matches$lteam)
-    # colnames(train_df) <- c('matchup', 'win', 'wteam', 'lteam')
+                            'lteam' = lteam)
+    # train_df <- cbind(train_df, season_matches$wteam, season_matches$lteam) , 'lteam_name' = lteam_name
+    # colnames(train_df) <- c('matchup', 'win', 'wteam', 'lteam') 'wteam_name' = wteam_name,
 }
