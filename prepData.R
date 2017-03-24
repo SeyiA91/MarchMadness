@@ -81,36 +81,36 @@ prepTrainingData <- function(season.years, createTrainMatchups = T) {
 prepTestingData <- function(season.years){
     newMatchups <- submissionFile(season.years)
     teamMetrics <- prepTrainingData(season.years, F)
-    teamMetrics.b <- teamMetrics
-    colnames(teamMetrics) <- labelTeamStats('a', teamMetrics)
-    colnames(teamMetrics.b) <- labelTeamStats('b', teamMetrics.b)
+    teamMetrics.l <- teamMetrics
+    colnames(teamMetrics) <- labelTeamStats('w', teamMetrics)
+    colnames(teamMetrics.l) <- labelTeamStats('l', teamMetrics.l)
     newMatchupIDs <- t(as.data.frame(str_split(as.character(newMatchups$matchup), '_')))
-    newMatchupIDs <- data.frame('ateamID' = newMatchupIDs[,2], 'bteamID' = newMatchupIDs[,3])
+    newMatchupIDs <- data.frame('wteam' = newMatchupIDs[,2], 'lteam' = newMatchupIDs[,3])
     row.names(newMatchupIDs) <- 1:nrow(newMatchupIDs)
     newMatchups <- cbind(newMatchups, newMatchupIDs)
     
-    ateam.df <- data.frame()
-    for (i in newMatchupIDs$ateamID){
-        ateam.df <- rbind(ateam.df, teamMetrics[match(i, teamMetrics$TEAMID), ])
+    wteam.df <- data.frame()
+    for (i in newMatchupIDs$wteam){
+        wteam.df <- rbind(wteam.df, teamMetrics[match(i, teamMetrics$wteam), ])
     }
     
-    bteam.df <- data.frame()
-    for (i in newMatchupIDs$bteamID){
-        bteam.df <- rbind(bteam.df, teamMetrics.b[match(i, teamMetrics.b$TEAMID), ])
+    lteam.df <- data.frame()
+    for (i in newMatchupIDs$lteam){
+        lteam.df <- rbind(lteam.df, teamMetrics.l[match(i, teamMetrics.l$lteam), ])
     }
     # remove teamID columns
-    ateam.df <- ateam.df[, -c(1, which(names(ateam.df) == 'season'))]
-    bteam.df <- bteam.df[, -c(1, which(names(ateam.df) == 'season'))]
+    wteam.df <- wteam.df[, -c(1)]
+    lteam.df <- lteam.df[, -c(1, which(names(lteam.df) == 'season'))]
     
     # putting it all together
-    newMatchups <- cbind(newMatchups, ateam.df, bteam.df)
+    newMatchups <- cbind(newMatchups, wteam.df, lteam.df)
     
     # reordering columns
-    acols <- names(newMatchups[,grep('a_', names(newMatchups))])
-    bcols <- names(newMatchups[,grep('b_', names(newMatchups))])
-    newMatchups <- newMatchups[, c("matchup", "win", "ateamID", "a_TEAM_NAME",
-                                       "bteamID", "b_TEAM_NAME", acols[-which(acols == 'a_TEAM_NAME')],
-                                       bcols[-which(bcols == 'b_TEAM_NAME')])]
+    wcols <- names(newMatchups[,grep('w_', names(newMatchups))])
+    lcols <- names(newMatchups[,grep('l_', names(newMatchups))])
+    newMatchups <- newMatchups[, c("season","matchup", "win", "wteam", "w_TEAM_NAME",
+                                       "lteam", "l_TEAM_NAME", wcols[-which(wcols == 'w_TEAM_NAME')],
+                                       lcols[-which(lcols == 'l_TEAM_NAME')])]
     newMatchups$win <- as.factor(newMatchups$win)
     return(newMatchups)
 }
