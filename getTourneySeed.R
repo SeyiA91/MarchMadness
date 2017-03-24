@@ -26,14 +26,3 @@ getTourneySeed <- function(season.years) {
     }
     df <- data.frame('TEAMID' = team, 'TEAM_NAME' = team_name, 'season' = season, 'seed' = seed)
 }
-
-
-# # Seed in tourney
-# playoff_seeds <- tourney_seeds[which(tourney_seeds$Season == 2003),]
-# pattern <- "[A-Z]([0-9][0-9])"
-# seed_col <- vector()
-# for (i in playoff_teams){
-#     val <- match(i, playoff_seeds$Team)
-#     seed_col <- c(seed_col, playoff_seeds$numeric.seed[val])
-# }
-# team_seed <- data.frame("TEAMID" = playoff_teams, 'seed' = seed_col)
