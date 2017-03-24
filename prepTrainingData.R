@@ -20,9 +20,7 @@ tourney_seeds <- fread('TourneySeeds.csv')
 tourney_slots <- fread('TourneySlots.csv')
 sample <- fread('sample_submission.csv')
 
-prepTrainingData <- function(season.years) {
-    train_df <- createTrainingMatchups(season.years)
-    
+prepTrainingData <- function(season.years, createTrainMatchups = T) {
     # Creating training data 
     require(stringr)
     
@@ -48,26 +46,33 @@ prepTrainingData <- function(season.years) {
     stats <- Reduce(function(x, y) merge(x, y, by = c('TEAMID', 'season')), list(winPctage, shootingpct, assistsNturnovers,
                                                                                  reboundStats, wins_last_six_games_by_team, seeding))
     
-    stats.w <- stats
-    colnames(stats.w) <- labelTeamStats('w', stats)
-    stats.l <- stats
-    colnames(stats.l) <- labelTeamStats('l', stats)
-    # creating final df
-    team_metrics.w <- merge(train_df, stats.w, by = c('wteam', 'season'))
-    team_metrics.t <- merge(team_metrics.w, stats.l, by = c('lteam', 'season'))
+    team_metrics <- stats
     
-    # reordering columns
-    wcols <- names(team_metrics.t[,grep('w_', names(team_metrics.t))])
-    lcols <- names(team_metrics.t[,grep('l_', names(team_metrics.t))])
-    team_metrics <- team_metrics.t[, c("season", "matchup", "win", "wteam", "w_TEAM_NAME",
-                                       "lteam", "l_TEAM_NAME", wcols[-11], lcols[-11])]
+    if (createTrainMatchups == T){
+        train_df <- createTrainingMatchups(season.years)
+        
+        stats.w <- stats
+        colnames(stats.w) <- labelTeamStats('w', stats)
+        stats.l <- stats
+        colnames(stats.l) <- labelTeamStats('l', stats)
+        # creating final df
+        team_metrics.w <- merge(train_df, stats.w, by = c('wteam', 'season'))
+        team_metrics.t <- merge(team_metrics.w, stats.l, by = c('lteam', 'season'))
+        
+        # reordering columns
+        wcols <- names(team_metrics.t[,grep('w_', names(team_metrics.t))])
+        lcols <- names(team_metrics.t[,grep('l_', names(team_metrics.t))])
+        team_metrics <- team_metrics.t[, c("season", "matchup", "win", "wteam", "w_TEAM_NAME",
+                                           "lteam", "l_TEAM_NAME", wcols[-which(wcols == 'w_TEAM_NAME')],
+                                           lcols[-which(lcols == 'l_TEAM_NAME')])]
+        team_metrics$win <- as.factor(team_metrics$win)
+        team_metrics$wteam <- as.factor(team_metrics$wteam)
+        team_metrics$lteam <- as.factor(team_metrics$lteam)
+    }
+    
     team_metrics <- team_metrics[order(team_metrics$season),]
     
     # chaning classes of certain vars
     # team_metrics$season <- as.factor(team_metrics$season)
-    team_metrics$win <- as.factor(team_metrics$win)
-    team_metrics$wteam <- as.factor(team_metrics$wteam)
-    team_metrics$lteam <- as.factor(team_metrics$lteam)
-    
     return(team_metrics)
 }
